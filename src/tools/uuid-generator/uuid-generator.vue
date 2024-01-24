@@ -36,13 +36,25 @@ const generators = {
   v5: () => generateUuidV5(v35Args.value.name, v35Args.value.namespace),
 };
 
+// const [uuids, refreshUUIDs] = computedRefreshable(() => withDefaultOnError(() =>
+//   Array.from({ length: count.value }, (_ignored, index) => {
+//     const generator = generators[version.value] ?? generators.NIL;
+//     return generator(index);
+//   }).join('\n'), ''));
 const [uuids, refreshUUIDs] = computedRefreshable(() => withDefaultOnError(() =>
   Array.from({ length: count.value }, (_ignored, index) => {
     const generator = generators[version.value] ?? generators.NIL;
-    return generator(index);
+    return uuidPrefix.value + generator(index) + uuidSuffix.value;
   }).join('\n'), ''));
 
 const { copy } = useCopy({ source: uuids, text: 'UUIDs copied to the clipboard' });
+const refreshUUIDsAndCopy = async () => {
+  refreshUUIDs();
+  await nextTick(); // 等待Vue的下一个更新周期，以确保uuids已经更新
+  await copy();
+};
+const uuidPrefix = ref('SESSION');
+const uuidSuffix = ref('@cloudminds-test.com.cn');
 </script>
 
 <template>
@@ -90,7 +102,14 @@ const { copy } = useCopy({ source: uuids, text: 'UUIDs copied to the clipboard' 
         mb-2
       />
     </div>
-
+    <div mb-2 flex items-center>
+      <span w-100px>UUID Prefix </span>
+      <c-input-text v-model:value="uuidPrefix" flex-1 placeholder="UUID prefix" />
+    </div>
+    <div mb-2 flex items-center>
+      <span w-100px>UUID Suffix </span>
+      <c-input-text v-model:value="uuidSuffix" flex-1 placeholder="UUID suffix" />
+    </div>
     <c-input-text
       style="text-align: center; font-family: monospace"
       :value="uuids"
@@ -106,6 +125,9 @@ const { copy } = useCopy({ source: uuids, text: 'UUIDs copied to the clipboard' 
     />
 
     <div flex justify-center gap-3>
+      <c-button autofocus @click="refreshUUIDsAndCopy()">
+        RefreshAndCopy
+      </c-button>
       <c-button autofocus @click="copy()">
         Copy
       </c-button>

@@ -29,7 +29,7 @@ const appTheme = useAppTheme();
             {{ $t('toolCard.new') }}
           </n-tag>
 
-          <FavoriteButton :tool="tool" />
+<!--          <FavoriteButton :tool="tool" />-->
         </div>
       </div>
       <n-h3 class="title">
